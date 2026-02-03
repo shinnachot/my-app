@@ -17,6 +17,9 @@ export default function Header() {
                         <li>
                             <Link href="/task">Task</Link>
                         </li>
+                        <li>
+                            <Link href="/product">Product</Link>
+                        </li>
                     </div>
                     <div className="flex gap-4 items-center">
                         {status === 'loading' ? (

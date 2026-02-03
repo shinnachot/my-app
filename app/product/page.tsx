@@ -4,16 +4,16 @@ import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { apiGet } from '../lib/apiClient';
 
-interface Task {
+interface Product {
     id: string;
-    title?: string;
-    description?: string;
+    name?: string;
+    price?: number;
     [key: string]: any;
 }
 
-export default function TaskPage(): React.ReactNode {
+export default function ProductPage(): React.ReactNode {
     const { data: session, status } = useSession();
-    const [tasks, setTasks] = useState<Task[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -21,17 +21,14 @@ export default function TaskPage(): React.ReactNode {
         const fetchTasks = async () => {
             if (status === 'loading') return; // รอให้ session โหลดเสร็จก่อน
 
-            if (!session?.user) {
-                setError('กรุณาเข้าสู่ระบบก่อน');
-                return;
-            }
-
             setLoading(true);
             setError(null);
 
             try {
-                // apiGet จะดึง token จาก session และจัดการ refresh อัตโนมัติ
-                const response = await apiGet(process.env.NEXT_PUBLIC_APP_ENDPOINT + '/tasks');
+                // API นี้ไม่ต้องการ accessToken
+                const response = await apiGet(process.env.NEXT_PUBLIC_APP_ENDPOINT + '/product', {
+                    skipAuth: true
+                });
 
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
@@ -39,7 +36,7 @@ export default function TaskPage(): React.ReactNode {
                 }
 
                 const data = await response.json();
-                setTasks(Array.isArray(data) ? data : []);
+                setProducts(Array.isArray(data) ? data : []);
             } catch (err: any) {
                 setError(err.message || 'เกิดข้อผิดพลาดในการโหลดข้อมูล');
                 console.error('Error fetching tasks:', err);
@@ -54,24 +51,15 @@ export default function TaskPage(): React.ReactNode {
     if (status === 'loading') {
         return (
             <div className="p-8">
-                <h1 className="text-2xl font-bold mb-4">Task</h1>
+                <h1 className="text-2xl font-bold mb-4">Product</h1>
                 <p>กำลังโหลด...</p>
-            </div>
-        );
-    }
-
-    if (!session?.user) {
-        return (
-            <div className="p-8">
-                <h1 className="text-2xl font-bold mb-4">Task</h1>
-                <p className="text-red-500">กรุณาเข้าสู่ระบบก่อน</p>
             </div>
         );
     }
 
     return (
         <div className="p-8">
-            <h1 className="text-2xl font-bold mb-4">Task</h1>
+            <h1 className="text-2xl font-bold mb-4">Product</h1>
 
             {loading && <p>กำลังโหลดข้อมูล...</p>}
 
@@ -83,15 +71,15 @@ export default function TaskPage(): React.ReactNode {
 
             {!loading && !error && (
                 <div>
-                    {tasks.length === 0 ? (
-                        <p>ไม่มีข้อมูล tasks</p>
+                    {products.length === 0 ? (
+                        <p>ไม่มีข้อมูล products</p>
                     ) : (
                         <ul className="space-y-2">
-                            {tasks.map((task) => (
-                                <li key={task.id} className="border p-4 rounded">
-                                    <h3 className="font-semibold">{task.title || `Task ${task.id}`}</h3>
-                                    {task.description && (
-                                        <p className="text-gray-600">{task.description}</p>
+                            {products.map((product) => (
+                                <li key={product.id} className="border p-4 rounded">
+                                    <h3 className="font-semibold">{product.name || `product ${product.id}`}</h3>
+                                    {product.price && (
+                                        <p className="text-gray-600">{product.price}</p>
                                     )}
                                 </li>
                             ))}
