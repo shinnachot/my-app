@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useSession } from 'next-auth/react';
-import { apiClient } from '../lib/apiClient';
+import { useGetTasksQuery } from '../lib/api';
 
 interface Task {
     id: string;
@@ -12,6 +12,10 @@ interface Task {
 }
 
 function getErrorMessage(err: unknown): string {
+    if (err && typeof err === 'object' && 'data' in err) {
+        const errorData = (err as { data?: { message?: string } }).data
+        if (errorData?.message) return errorData.message
+    }
     if (err instanceof Error) return err.message;
     if (typeof err === 'string') return err;
     return 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
@@ -19,36 +23,10 @@ function getErrorMessage(err: unknown): string {
 
 export default function TaskPage(): React.ReactNode {
     const { data: session, status } = useSession();
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchTasks = async () => {
-            if (status === 'loading') return; // รอให้ session โหลดเสร็จก่อน
-
-            if (!session?.user) {
-                setError('กรุณาเข้าสู่ระบบก่อน');
-                return;
-            }
-
-            setLoading(true);
-            setError(null);
-
-            try {
-                // apiClient จะดึง token จาก session และจัดการ refresh อัตโนมัติเมื่อเจอ 401
-                const { data } = await apiClient.get<Task[]>('/tasks');
-                setTasks(Array.isArray(data) ? data : []);
-            } catch (err: unknown) {
-                setError(getErrorMessage(err));
-                console.error('Error fetching tasks:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchTasks();
-    }, [session, status]);
+    // Skip query if session is loading or user is not authenticated
+    const { data: tasks = [], isLoading: loading, error } = useGetTasksQuery(undefined, {
+        skip: status === 'loading' || !session?.user,
+    });
 
     if (status === 'loading') {
         return (
@@ -76,7 +54,7 @@ export default function TaskPage(): React.ReactNode {
 
             {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    {error}
+                    {getErrorMessage(error)}
                 </div>
             )}
 
@@ -86,14 +64,19 @@ export default function TaskPage(): React.ReactNode {
                         <p>ไม่มีข้อมูล tasks</p>
                     ) : (
                         <ul className="space-y-2">
-                            {tasks.map((task) => (
-                                <li key={task.id} className="border p-4 rounded">
-                                    <h3 className="font-semibold">{task.title || `Task ${task.id}`}</h3>
-                                    {task.description && (
-                                        <p className="text-gray-600">{task.description}</p>
-                                    )}
-                                </li>
-                            ))}
+                            {tasks.map((task) => {
+                                const taskId = typeof task.id === 'string' ? task.id : String(task.id ?? '')
+                                const taskTitle = typeof task.title === 'string' ? task.title : `Task ${taskId}`
+                                const taskDescription = typeof task.description === 'string' ? task.description : null
+                                return (
+                                    <li key={taskId} className="border p-4 rounded">
+                                        <h3 className="font-semibold">{taskTitle}</h3>
+                                        {taskDescription !== null && (
+                                            <p className="text-gray-600">{taskDescription}</p>
+                                        )}
+                                    </li>
+                                )
+                            })}
                         </ul>
                     )}
                 </div>
