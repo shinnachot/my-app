@@ -41,7 +41,6 @@ apiClient.interceptors.request.use(async (config) => {
     if (config.skipAuth) return config
 
     const accessToken = await getAccessToken()
-    console.log('accessToken', accessToken)
     if (!accessToken) return config
 
     const authValue = `Bearer ${accessToken}`
@@ -78,13 +77,10 @@ apiClient.interceptors.response.use(
             originalRequest._retry = true
             // Trigger NextAuth to run server-side jwt callback (which refreshes tokens)
             const session = await getSession()
-            console.log('session', session)
             const newAccessToken = session?.user?.accessToken
-            console.log('newAccessToken1', newAccessToken)
             if (!newAccessToken) {
                 throw error
             }
-            console.log('newAccessToken2', newAccessToken)
             setTokens({ accessToken: newAccessToken })
             const authValue = `Bearer ${newAccessToken}`
 

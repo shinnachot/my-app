@@ -28,7 +28,6 @@ async function refreshWithBackend(
 ): Promise<{ accessToken: string; refreshToken?: string }> {
     const base = process.env.NEXT_PUBLIC_APP_ENDPOINT
     if (!base) throw new Error('NEXT_PUBLIC_APP_ENDPOINT is not set')
-    console.log('call backend')
     const response = await fetch(`${base}/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -133,9 +132,7 @@ const authOptions: NextAuthOptions = {
             }
 
             try {
-                console.log('[nextauth] refreshing, hasRT=', !!token.refreshToken)
                 const refreshed = await refreshWithBackend(token.refreshToken)
-                console.log('refreshed', refreshed)
                 token.accessToken = refreshed.accessToken
                 token.accessTokenExpires =
                     decodeJwtExpMs(refreshed.accessToken) ?? Date.now() + 5 * 60 * 1000
