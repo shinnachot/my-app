@@ -2,13 +2,19 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { apiGet } from '../lib/apiClient';
+import { apiClient } from '../lib/apiClient';
 
 interface Task {
     id: string;
     title?: string;
     description?: string;
-    [key: string]: any;
+    [key: string]: unknown;
+}
+
+function getErrorMessage(err: unknown): string {
+    if (err instanceof Error) return err.message;
+    if (typeof err === 'string') return err;
+    return 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
 }
 
 export default function TaskPage(): React.ReactNode {
@@ -30,18 +36,11 @@ export default function TaskPage(): React.ReactNode {
             setError(null);
 
             try {
-                // apiGet จะดึง token จาก session และจัดการ refresh อัตโนมัติ
-                const response = await apiGet(process.env.NEXT_PUBLIC_APP_ENDPOINT + '/tasks');
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
+                // apiClient จะดึง token จาก session และจัดการ refresh อัตโนมัติเมื่อเจอ 401
+                const { data } = await apiClient.get<Task[]>('/tasks');
                 setTasks(Array.isArray(data) ? data : []);
-            } catch (err: any) {
-                setError(err.message || 'เกิดข้อผิดพลาดในการโหลดข้อมูล');
+            } catch (err: unknown) {
+                setError(getErrorMessage(err));
                 console.error('Error fetching tasks:', err);
             } finally {
                 setLoading(false);

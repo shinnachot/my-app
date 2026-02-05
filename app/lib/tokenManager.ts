@@ -1,72 +1,32 @@
-'use client';
+import { getSession } from 'next-auth/react'
 
-export interface RefreshTokenResponse {
-    accessToken: string;
-    refreshToken?: string;
+export type AuthTokens = {
+    accessToken?: string
 }
 
 /**
- * เรียก refresh token API เพื่อรับ accessToken ใหม่
+ * In-memory access token cache.
+ *
+ * Production note:
+ * - Do NOT store refresh tokens in browser storage (sessionStorage/localStorage).
+ * - Refresh should happen server-side (e.g., NextAuth jwt callback) using HttpOnly cookies.
  */
-export async function refreshAccessToken(refreshToken: string): Promise<RefreshTokenResponse> {
-    try {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_APP_ENDPOINT || 'http://localhost:3001'}/auth/refresh`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    refreshToken,
-                }),
-            }
-        );
+let memoryTokens: AuthTokens = {}
 
-        if (!response.ok) {
-            const errorData = (await response.json().catch(() => ({}))) as { message?: string };
-            throw new Error(errorData.message || 'การ refresh token ล้มเหลว');
-        }
+export function setTokens(tokens: AuthTokens) {
+    memoryTokens = { ...memoryTokens, ...tokens }
+}
 
-        const data = await response.json();
-        
-        if (!data.accessToken) {
-            throw new Error('ไม่พบ accessToken จาก server');
-        }
+export function clearTokens() {
+    memoryTokens = {}
+}
 
-        return {
-            accessToken: data.accessToken,
-            refreshToken: data.refreshToken || refreshToken, // ถ้าไม่มี refreshToken ใหม่ให้ใช้ตัวเดิม
-        };
-    } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการ refresh token';
-        throw new Error(errorMessage);
+export async function getAccessToken(): Promise<string | undefined> {
+    if (memoryTokens.accessToken) return memoryTokens.accessToken
+    const session = await getSession()
+    const accessToken = session?.user?.accessToken
+    if (accessToken) {
+        memoryTokens = { ...memoryTokens, accessToken }
     }
-}
-
-/**
- * อัปเดต session ด้วย token ใหม่
- * เนื่องจาก NextAuth ใช้ JWT strategy, token จะถูกเก็บใน cookie
- * วิธีที่ดีที่สุดคือการอัปเดตผ่าน JWT callback ใน route.ts
- * แต่สำหรับ client-side, เราจะ return token ใหม่และให้ component ใช้ token ใหม่โดยตรง
- * หรือใช้วิธี refresh session
- */
-export async function updateSessionWithNewToken(
-    accessToken: string,
-    refreshToken: string
-): Promise<{ accessToken: string; refreshToken: string }> {
-    // Return token ใหม่เพื่อให้ component ใช้
-    // Session จะถูกอัปเดตอัตโนมัติเมื่อมีการเรียก getSession() ครั้งต่อไป
-    // หรือ component สามารถใช้ token ใหม่โดยตรงได้
-    return {
-        accessToken,
-        refreshToken,
-    };
-}
-
-/**
- * ตรวจสอบว่า response เป็น 401 Unauthorized หรือไม่
- */
-export function isUnauthorizedResponse(response: Response): boolean {
-    return response.status === 401;
+    return accessToken
 }

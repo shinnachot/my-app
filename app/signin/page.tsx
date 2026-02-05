@@ -5,13 +5,18 @@ import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
+interface SignInFormData {
+    username: string;
+    password: string;
+}
+
 export default function SigninPage(): React.ReactNode {
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { register, handleSubmit, formState: { errors } } = useForm<SignInFormData>();
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    const onSubmit = async (data: { username: string; password: string }) => {
+    const onSubmit = async (data: SignInFormData) => {
         setError('');
         setLoading(true);
 
