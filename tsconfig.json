@@ -21,10 +21,18 @@
         "baseUrl": "./",
         "paths": {
             "@/*": ["./*"],
+            "@store/*": ["store/*"],
             "@context/*": ["context/*"],
             "@hooks/*": ["hooks/*"]
         }
     },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.d.ts", "types/**/*.d.ts", ".next/types/**/*.ts"],
+    "include": [
+        "next-env.d.ts",
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.d.ts",
+        "types/**/*.d.ts",
+        ".next/types/**/*.ts"
+    ],
     "exclude": ["node_modules"]
 }

@@ -5,6 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 
 export default function Header() {
     const { data: session, status } = useSession();
+    console.log("session", session);
 
     return (
         <header className="bg-white p-4 text-black border-b">
@@ -19,6 +20,9 @@ export default function Header() {
                         </li>
                         <li>
                             <Link href="/product">Product</Link>
+                        </li>
+                        <li>
+                            <Link href="/zustand">Zustand</Link>
                         </li>
                     </div>
                     <div className="flex gap-4 items-center">
