@@ -1,6 +1,6 @@
 'use client'
 
-import { useCounterStore } from '@store/useCounterStore';
+import { useCounterStore } from '@/redux/store/useCounterStore';
 
 export default function ZustandPage() {
     const { count, inc, dec } = useCounterStore()

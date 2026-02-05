@@ -1,5 +1,5 @@
 import { createSelector, createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit'
-import type { RootState } from '@store/store'
+import type { RootState } from '@/redux/store'
 
 export type TemperatureItem = {
     id: string

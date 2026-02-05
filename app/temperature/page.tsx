@@ -8,8 +8,8 @@ import {
     temperatureAdded,
     temperatureRemoved,
     temperaturesCleared,
-} from "@store/temperatureSlice";
-import { useAppDispatch, useAppSelector } from "@store/hooks";
+} from "@/redux/temperatureSlice";
+import { useAppDispatch, useAppSelector } from "@/hooks/useAppState";
 
 function formatDateTime(iso: string) {
     try {
