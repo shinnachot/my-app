@@ -4,6 +4,7 @@ import "./globals.css";
 import ApolloWrapper from "./lib/ApolloWrapper";
 import SessionProvider from "./lib/SessionProvider";
 import Header from "./components/Header";
+import StoreProvider from "./StoreProvider";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -28,14 +29,16 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                <SessionProvider>
-                    <ApolloWrapper>
-                        <Header />
-                        <main className="relative min-h-full flex-auto">
-                            {children}
-                        </main>
-                    </ApolloWrapper>
-                </SessionProvider>
+                <StoreProvider>
+                    <SessionProvider>
+                        <ApolloWrapper>
+                            <Header />
+                            <main className="relative min-h-full flex-auto">
+                                {children}
+                            </main>
+                        </ApolloWrapper>
+                    </SessionProvider>
+                </StoreProvider>
             </body>
         </html>
     );

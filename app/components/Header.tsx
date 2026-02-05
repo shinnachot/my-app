@@ -24,6 +24,9 @@ export default function Header() {
                         <li>
                             <Link href="/zustand">Zustand</Link>
                         </li>
+                        <li>
+                            <Link href="/counter">Redux Counter</Link>
+                        </li>
                     </div>
                     <div className="flex gap-4 items-center">
                         {status === 'loading' ? (
