@@ -7,6 +7,39 @@ export default function Header() {
     const { data: session, status } = useSession();
     console.log("session", session);
 
+    const authContent = (() => {
+        if (status === "loading") {
+            return <li>กำลังโหลด...</li>;
+        }
+
+        if (session) {
+            return (
+                <>
+                    <li className="text-sm">สวัสดี, {session.user?.name}</li>
+                    <li>
+                        <button
+                            onClick={() => signOut({ callbackUrl: "/" })}
+                            className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                        >
+                            Sign Out
+                        </button>
+                    </li>
+                </>
+            );
+        }
+
+        return (
+            <li>
+                <Link
+                    href="/signin"
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                >
+                    Sign In
+                </Link>
+            </li>
+        );
+    })();
+
     return (
         <header className="bg-white p-4 text-black border-b">
             <nav>
@@ -27,34 +60,12 @@ export default function Header() {
                         <li>
                             <Link href="/counter">Redux Counter</Link>
                         </li>
+                        <li>
+                            <Link href="/temperature">Temperature (Redux)</Link>
+                        </li>
                     </div>
                     <div className="flex gap-4 items-center">
-                        {status === 'loading' ? (
-                            <li>กำลังโหลด...</li>
-                        ) : session ? (
-                            <>
-                                <li className="text-sm">
-                                    สวัสดี, {session.user?.name}
-                                </li>
-                                <li>
-                                    <button
-                                        onClick={() => signOut({ callbackUrl: '/' })}
-                                        className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-                                    >
-                                        Sign Out
-                                    </button>
-                                </li>
-                            </>
-                        ) : (
-                            <li>
-                                <Link
-                                    href="/signin"
-                                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                                >
-                                    Sign In
-                                </Link>
-                            </li>
-                        )}
+                        {authContent}
                     </div>
                 </ul>
             </nav>

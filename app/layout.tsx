@@ -3,8 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ApolloWrapper from "./lib/ApolloWrapper";
 import SessionProvider from "./lib/SessionProvider";
+import ReduxProvider from "./lib/ReduxProvider";
 import Header from "./components/Header";
-import StoreProvider from "./StoreProvider";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -29,16 +29,14 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                <StoreProvider>
+                <ReduxProvider>
                     <SessionProvider>
                         <ApolloWrapper>
                             <Header />
-                            <main className="relative min-h-full flex-auto">
-                                {children}
-                            </main>
+                            <main className="relative min-h-full flex-auto">{children}</main>
                         </ApolloWrapper>
                     </SessionProvider>
-                </StoreProvider>
+                </ReduxProvider>
             </body>
         </html>
     );
