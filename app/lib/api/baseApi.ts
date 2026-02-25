@@ -5,7 +5,7 @@ import {
     FetchArgs,
     FetchBaseQueryError
 } from '@reduxjs/toolkit/query/react'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { getAccessToken, setTokens } from '../tokenManager'
 
 const baseURL = process.env.NEXT_PUBLIC_APP_ENDPOINT
@@ -93,6 +93,13 @@ export const baseQueryWithReauth: BaseQueryFn<
     if (result.error?.status === 401) {
         // Trigger NextAuth to refresh token server-side
         const session = await getSession()
+
+        // Refresh failed (e.g. refresh token expired) → logout
+        if (session?.error === 'RefreshAccessTokenError') {
+            await signOut({ callbackUrl: '/signin' })
+            return result
+        }
+
         const newAccessToken = session?.user?.accessToken
 
         if (newAccessToken) {

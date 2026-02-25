@@ -58,7 +58,7 @@ export default function Header() {
                             <Link href="/zustand">Zustand</Link>
                         </li>
                         <li>
-                            <Link href="/counter">Redux Counter</Link>
+                            <Link href="/counter">Test useReducer</Link>
                         </li>
                         <li>
                             <Link href="/temperature">Temperature (Redux)</Link>
