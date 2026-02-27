@@ -5,6 +5,8 @@ import ApolloWrapper from "./lib/ApolloWrapper";
 import SessionProvider from "./lib/SessionProvider";
 import ReduxProvider from "./lib/ReduxProvider";
 import Header from "./components/Header";
+import { ManagementProvider } from "@/context/managementContext";
+import { ThemeProvider } from "next-themes";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -27,14 +29,18 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 <ReduxProvider>
                     <SessionProvider>
-                        <ApolloWrapper>
-                            <Header />
-                            <main className="relative min-h-full flex-auto">{children}</main>
-                        </ApolloWrapper>
+                        <ThemeProvider attribute="class" defaultTheme="system" storageKey="theme-preference">
+                            <ManagementProvider>
+                                <ApolloWrapper>
+                                    <Header />
+                                    <main className="relative min-h-full flex-auto">{children}</main>
+                                </ApolloWrapper>
+                            </ManagementProvider>
+                        </ThemeProvider>
                     </SessionProvider>
                 </ReduxProvider>
             </body>

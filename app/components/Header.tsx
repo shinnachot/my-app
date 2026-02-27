@@ -1,11 +1,31 @@
 'use client';
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { useTheme } from "next-themes";
+
+function ThemeToggle() {
+    const [mounted, setMounted] = useState(false);
+    const { resolvedTheme, setTheme } = useTheme();
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) {
+        return <button className="w-24 h-9">Theme</button>;
+    }
+
+    return (
+        <button onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
+            Toggle theme (current: {resolvedTheme})
+        </button>
+    );
+}
 
 export default function Header() {
     const { data: session, status } = useSession();
-    console.log("session", session);
 
     const authContent = (() => {
         if (status === "loading") {
@@ -58,13 +78,17 @@ export default function Header() {
                             <Link href="/zustand">Zustand</Link>
                         </li>
                         <li>
-                            <Link href="/counter">Test useReducer</Link>
+                            <Link href="/management">Management</Link>
                         </li>
                         <li>
                             <Link href="/temperature">Temperature (Redux)</Link>
                         </li>
+                        <li>
+                            <Link href="/food">Food Reducer</Link>
+                        </li>
                     </div>
                     <div className="flex gap-4 items-center">
+                        <ThemeToggle />
                         {authContent}
                     </div>
                 </ul>
